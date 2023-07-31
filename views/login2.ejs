@@ -67,12 +67,17 @@
 <body>
     <div class="container">
         <div class="welcome-text">Welcome to Authentication Page</div>
-        <h2>Login</h2>
+        <% if(message){ %>
+            <div style="color:green;"><h2><%=message%></h2></div>
+
+            <% } %> 
         <form class="login-form" action="login-user" method="post">
             <input type="text" id="emailid" placeholder="Username or Email" name="username" required>
             <input type="password" id="psd" placeholder="Password" name="password" required>
             <button id="sub" type="submit">Login</button>
         </form>
+        
+        
         <div class="signup-link">
             <p>Don't have an account? <a href="/signup" target="_self">Sign up</a></p>
         </div>

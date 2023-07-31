@@ -1,0 +1,40 @@
+{
+    "employees": [
+      {
+        "id": 1,
+        "name": "John Doe",
+        "position": "Software Engineer",
+        "salary": 60000
+      },
+      {
+        "id": 2,
+        "name": "Jane Smith",
+        "position": "Data Scientist",
+        "salary": 75000
+      },
+      {
+        "id": 3,
+        "name": "Mike Johnson",
+        "position": "UX Designer",
+        "salary": 55000
+      }
+    ],
+    "departments": [
+      {
+        "id": 101,
+        "name": "Engineering",
+        "location": "New York"
+      },
+      {
+        "id": 102,
+        "name": "Data Science",
+        "location": "San Francisco"
+      },
+      {
+        "id": 103,
+        "name": "Design",
+        "location": "Seattle"
+      }
+    ]
+  }
+  

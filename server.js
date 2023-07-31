@@ -2,7 +2,8 @@ const express = require('express');
 const app = express();
 const fs=require('fs');
 var session = require('express-session');
-app.use("view engine","ejs");
+app.set("view engine","ejs");
+// app.set('views', __dirname + '/views');
 app.use(express.json());//take out the data and add in the request as the name of the body
 app.use(express.urlencoded({extended:true}));
 app.use(session({
@@ -17,14 +18,29 @@ app.use(session({
         res.redirect('/login');
         return;
     }
-    res.sendFile(__dirname + "/home.html");
+    fs.readFile("data.json","utf-8",function(err,dat){
+        if(err){
+            res.render("error",{message:err.message})
+        }else{
+
+            res.render("home",{user:req.session.username,dat:dat});
+        }
+    });
+    // res.redirect(__dirname + "/home.html");
 });
 app.get('/home', function (req, res) {
     if(!checkLoggedIn(req)){
         res.redirect('/login');
         return;
     }
-    res.sendFile(__dirname + "/home.html");
+    fs.readFile("data.json","utf-8",function(err,dat){
+        if(err){
+            res.render("error",{message:err.message})
+        }else{
+
+            res.render("home",{user:req.session.username,dat:dat});
+        }
+    });
 });
 app.get('/script.js', function (req, res) {
    
@@ -36,18 +52,19 @@ app.get('/script2.js', function (req, res) {
 });
 
 app.get("/signup",function (req, res) {
-    res.render(__dirname + "/signup.html");
+    res.sendFile(__dirname + "/signup.html");
 });
 
 app.get("/login",function (req, res) {
-    res.render(__dirname + "/login.html");
+    res.sendFile(__dirname + "/login.html");
 });
 
 app.post("/login-user",function (req, res) {
-    // const username=req.body.username;
-    // const password=req.body.password;
+    const username=req.body.username;
+    const password=req.body.password;
     console.log(req.body);
-    validate(req.body,function(err,data){
+    let m={email: username, password: password};
+    validate(m,function(err,data){
         if(err){
             console.log("mai err")
             res.status(500).json({message:err.message+" Internal Server error"});
@@ -56,11 +73,20 @@ app.post("/login-user",function (req, res) {
 
             if(data.userFound){
                 req.session.isLoggedIn=true;
-                req.session.username=req.body.username;
-                res.status(200).json(data);
+                req.session.username=data.user;
+                console.log(data.user);
+                fs.readFile("data.json","utf-8",function(err,dat){
+                    if(err){
+                        res.render("error",{message:err.message})
+                    }else{
+
+                        res.render("home",{user:data.user,dat:dat});
+                    }
+                });
+                
                 return;
             }else{
-                res.status(401).json({message:" Check Email or Password"});
+                res.render("login",{error:" Check Email or Password"});
                 return;
             }
         
@@ -74,17 +100,38 @@ app.listen(3000, function () {
 
 
 app.post('/signup',function (req, res) {
-    
-    validateSignUp(req.body,function(err,data){
+    const email = req.body.email;
+    const password = req.body.password;
+    const confirmPassword = req.body.cf;
+    const name = req.body.user;
+    if(!name){
+        res.render("signup",{error:"Enter Username"});
+    }
+    if(!email){
+        res.render("signup",{error:"Enter Email"});
+    }
+    if(!password){
+        res.render("signup",{error:"Enter Password"});
+    }
+    if(!confirmPassword){
+        res.render("signup",{error:"Enter confirmPassword"});
+    }
+    if(password!==confirmPassword){
+        res.render("signup",{error:"Password and Confirm Password didn't match"});
+    }
+    let m={email: email, password: password, name:name};
+    validateSignUp(m,function(err,data){
         if(err){
-            console.log("mai err")
-            res.status(500).json({message:err.message+" Internal Server error"});
+            console.log("mai err");
+            res.render("signup",{error:"Internal Server error"});
+            // res.status(500).json({message:err.message+" Internal Server error"});
+
             return;
         }
 
             if(data.userFound){
-               
-                res.status(401).json({message:" Email already Exist"});
+               res.render("signup",{error:" Email already Exist"});
+                // res.status(401).json({message:" Email already Exist"});
                 return;
             }else{
                 // res.status(200).json(data);
@@ -93,7 +140,8 @@ app.post('/signup',function (req, res) {
 
                     if(err) {
                         console.log("hello");
-                        res.status(500).json({message:err.message+" Internal Server error"});
+                        res.render("signup",{error:"Internal Server error"});
+                        // res.status(500).json({message:err.message+" Internal Server error"});
                         return;
                     }
             
@@ -103,15 +151,18 @@ app.post('/signup',function (req, res) {
             
                     try{
                         data=JSON.parse(data);
-                        data.push(req.body);
+                        data.push(m);
             
             
                         fs.writeFile("users.txt",JSON.stringify(data),function(err){
                             if(err){
-                                res.status(500).json({message:err.message+" Internal"});
+                                res.render("signup",{error:"Internal Server error"});
+                                // res.status(500).json({message:err.message+" Internal"});
                                 return;
                             }
-                            res.status(200).json({message:"Todo saved successFully"});
+                            res.render("login2",{message:"Registered Successfully Now Login!"});
+                            return;
+                            // res.status(200).json({message:"Registered successFully"});
                         });
             
             
@@ -119,7 +170,8 @@ app.post('/signup',function (req, res) {
             
                     }
                     catch(err){
-                        res.status(500).json({message:err.message+" Internal Server error"});
+                        res.render("signup",{error:"Internal Server error"});
+                        // res.status(500).json({message:err.message+" Internal Server error"});
                         return;
                     }
             

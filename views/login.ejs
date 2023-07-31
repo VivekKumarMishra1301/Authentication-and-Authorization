@@ -73,6 +73,10 @@
             <input type="password" id="psd" placeholder="Password" name="password" required>
             <button id="sub" type="submit">Login</button>
         </form>
+        <% if(error){ %>
+            <div style="color:red;"><%=error%></div>
+        <% } %>
+        
         <div class="signup-link">
             <p>Don't have an account? <a href="/signup" target="_self">Sign up</a></p>
         </div>
